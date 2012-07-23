@@ -1,0 +1,26 @@
+{
+	"manifest_version" : 2,
+	"name": "utils tests",
+	"description": "Chrome Extension common utilities tests",
+	"version": "0.1",
+	"icons": { 
+		"16": "logo.png",
+		"48": "logo.png",
+		"128": "logo.png"
+	},
+	"permissions": [
+		"contextMenus",
+		"tabs",
+		"notifications",
+		"http://*/*",
+		"https://*/*",
+		"clipboardWrite",
+		"clipboardRead"
+	],
+	"app": {
+		"launch": {
+			"local_path": "main.html"
+		}
+	},
+	"minimum_chrome_version": "18"
+}
