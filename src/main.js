@@ -1,4 +1,121 @@
 // ------------------------------------------------------------------
+// Object Helpers
+// ------------------------------------------------------------------
+
+module("Object Helpers");
+
+test("Update by path", function() {
+
+	expect(1);
+
+	var obj = {
+		a: {
+			b: {
+				c: "test"
+			}
+		}
+	}
+
+	UTILS.OBJ.updateByPath(obj, "a.b.c", "test2");
+
+	ok(obj.a.b.c === "test2", "Object property updated")
+
+});
+
+test("Get by path", function() {
+
+	expect(1);
+
+	var obj = {
+		a: {
+			b: {
+				c: "test"
+			}
+		}
+	}
+
+	ok(UTILS.OBJ.getByPath(obj, "a.b.c") === "test", "Object value found")
+
+});
+
+// ------------------------------------------------------------------
+// Array Helpers
+// ------------------------------------------------------------------
+
+module("Array Helpers");
+
+test("Get index by object property value", function() {
+
+	expect(2);
+
+	var arr = [
+		{
+			a: "test"
+		},
+		{
+			a: {
+				b: {
+					c: "test2"
+				}
+			}
+		},
+		{
+			a: {
+				b: {
+					c: "test3"
+				}
+			}
+		}
+
+	];
+
+	ok(UTILS.ARRAY.getIndexByObjectPropertyValue(arr, "a", "test") === 0, "Found shallow");
+
+	// Shouldn't be test2
+	ok(UTILS.ARRAY.getIndexByObjectPropertyValue(arr, "a.b.c", "test3") === 2, "Found deep");
+
+	
+});
+
+// ------------------------------------------------------------------
+// DOM Helpers
+// ------------------------------------------------------------------
+
+module("DOM Helpers");
+
+test("Select by id", function() {
+
+	expect(1);
+
+	ok(UTILS.DOM.id("idTest").innerHTML === "idTest");
+
+});
+
+test("Select by query global", function() {
+
+	expect(1);
+
+	ok(UTILS.DOM.sel("div[role='banner'] .selTestContent")[0].innerHTML === "selTest");
+
+});
+
+test("Select by query contextual", function() {
+
+	expect(1);
+
+	ok(UTILS.DOM.sel(".selTestContent", UTILS.DOM.id("selTest"))[0].innerHTML === "selTest");
+
+});
+
+test("Create element", function() {
+
+	expect(1);
+	
+	ok(UTILS.DOM.create("div").nodeName === "DIV");
+
+});
+
+// ------------------------------------------------------------------
 // Event Dispatcher
 // ------------------------------------------------------------------
 
@@ -214,44 +331,5 @@ asyncTest("Send and receive", function() {
 		ok(msg.Data == "marco polo", "Message reciprocated");
 		start();
 	});
-
-});
-
-
-// ------------------------------------------------------------------
-// DOM tools
-// ------------------------------------------------------------------
-
-module("DOM tools");
-
-test("Select by id", function() {
-
-	expect(1);
-
-	ok(UTILS.DOM.id("idTest").innerHTML === "idTest");
-
-});
-
-test("Select by query global", function() {
-
-	expect(1);
-
-	ok(UTILS.DOM.sel("div[role='banner'] .selTestContent")[0].innerHTML === "selTest");
-
-});
-
-test("Select by query contextual", function() {
-
-	expect(1);
-
-	ok(UTILS.DOM.sel(".selTestContent", UTILS.DOM.id("selTest"))[0].innerHTML === "selTest");
-
-});
-
-test("Create element", function() {
-
-	expect(1);
-	
-	ok(UTILS.DOM.create("div").nodeName === "DIV");
 
 });

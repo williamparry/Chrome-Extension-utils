@@ -1,6 +1,101 @@
 var UTILS = {
 
     // ------------------------------------------------------------------
+    // Object Helpers
+    // ------------------------------------------------------------------
+
+    OBJ: {
+
+        updateByPath: function(obj, keyStr, value) {
+            var keyPath = keyStr.split('.'),
+            lastKeyIndex = keyPath.length - 1;
+            for (var i = 0; i < lastKeyIndex; ++i) {
+                key = keyPath[i];
+                if (!(key in obj))
+                    obj[key] = {}
+                obj = obj[key];
+            }
+            obj[keyPath[lastKeyIndex]] = value;
+        },
+
+        getByPath: function (ob, key) {
+            var path = key.split('.'),
+                objTraversals = 0;
+
+            function traverse(obj) {
+                if (typeof obj == 'object') {
+                    for (var y in obj) {
+                        if (y == path[objTraversals]) {
+                            if (objTraversals == path.length - 1) {
+                                return obj[y];
+                            } else {
+                                objTraversals++;
+                                return traverse(obj[y]);
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+
+            for (var x in ob) {
+                if (x == path[objTraversals]) {
+                    if (objTraversals == path.length - 1) {
+                        return ob[x] || "";
+                    } else {
+                        objTraversals++;
+                        return traverse(ob[x]);
+                    }
+                }
+            }
+            return null;
+        },
+
+    },
+
+    // ------------------------------------------------------------------
+    // Array Helpers
+    // ------------------------------------------------------------------
+
+    ARRAY: {
+
+        getIndexByObjectPropertyValue: function (arr, prop, val) {
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i] == val) {
+                    return i;
+                } else if (UTILS.OBJ.getByPath(arr[i], prop) == val) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+    },
+
+    // ------------------------------------------------------------------
+    // DOM Helpers
+    // ------------------------------------------------------------------
+
+    DOM: {
+
+        id: function (e) {
+            return document.getElementById(e);
+        },
+
+        sel: function (q,c) {
+            if(c) {
+                return c.querySelectorAll(q)
+            }
+            return document.querySelectorAll(q);
+        },
+
+        create: function (e) {
+            return document.createElement(e);
+        }
+
+    },
+
+    // ------------------------------------------------------------------
     // Event Dispatcher
     // ------------------------------------------------------------------
 
@@ -158,59 +253,6 @@ var UTILS = {
     },
 
     // ------------------------------------------------------------------
-    // Object Helpers
-    // ------------------------------------------------------------------
-
-    OBJ: {
-
-        updateByPath: function(obj, keyStr, value) {
-            var keyPath = keyStr.split('.'),
-            lastKeyIndex = keyPath.length - 1;
-            for (var i = 0; i < lastKeyIndex; ++i) {
-                key = keyPath[i];
-                if (!(key in obj))
-                    obj[key] = {}
-                obj = obj[key];
-            }
-            obj[keyPath[lastKeyIndex]] = value;
-        },
-
-        getByPath: function (ob, key) {
-            var path = key.split('.'),
-                objTraversals = 0;
-
-            function traverse(obj) {
-                if (typeof obj == 'object') {
-                    for (var y in obj) {
-                        if (y == path[objTraversals]) {
-                            if (objTraversals == path.length - 1) {
-                                return obj[y];
-                            } else {
-                                objTraversals++;
-                                return traverse(obj[y]);
-                            }
-                        }
-                    }
-                }
-                return null;
-            }
-
-            for (var x in ob) {
-                if (x == path[objTraversals]) {
-                    if (objTraversals == path.length - 1) {
-                        return ob[x] || "";
-                    } else {
-                        objTraversals++;
-                        return traverse(ob[x]);
-                    }
-                }
-            }
-            return null;
-        }
-
-    },
-
-    // ------------------------------------------------------------------
     // Local Store Data Access Layer
     // ------------------------------------------------------------------
 
@@ -245,41 +287,6 @@ var UTILS = {
             localStorage.removeItem(this.storage);
         }
 
-    },
-
-
-    // ------------------------------------------------------------------
-    // DOM Helpers
-    // ------------------------------------------------------------------
-
-    DOM: {
-
-        id: function (e) {
-            return document.getElementById(e);
-        },
-
-        sel: function (q,c) {
-            if(c) {
-                return c.querySelectorAll(q)
-            }
-            return document.querySelectorAll(q);
-        },
-
-        create: function (e) {
-            return document.createElement(e);
-        }
-
     }
 
 }
-
-Array.prototype.indexOfObject = function (prop, val) {
-    for (var i = 0; i < this.length; i++) {
-        if (this[i] == val) {
-            return i;
-        } else if (UTILS.getNestedObjectProperty(this[i], prop) == val) {
-            return i;
-        }
-    }
-    return -1;
-};
