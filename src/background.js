@@ -1,5 +1,5 @@
-var portMessenger = new PortMessenger(),
-	requestMessenger = new RequestMessenger();
+var portMessenger = new UTILS.PortMessenger(),
+	requestMessenger = new UTILS.RequestMessenger();
 
 // ------------------------------------------------------------------
 // Port Messenger

@@ -8,7 +8,7 @@ test("Get Listeners", function() {
 
 	expect(1);
 
-	var evtD = new EventDispatcher(['EVENT']);
+	var evtD = new UTILS.EventDispatcher(['EVENT']);
 
 	evtD.addEventListener(evtD.EVENT, function() {});
 	evtD.addEventListener(evtD.EVENT, function() {});
@@ -22,7 +22,7 @@ test("Add one function to multiple events", function() {
 
 	expect(2);
 
-	var evtD = new EventDispatcher(['EVENT_1', 'EVENT_2']);
+	var evtD = new UTILS.EventDispatcher(['EVENT_1', 'EVENT_2']);
 
 	evtD.addEventListener([evtD.EVENT_1, evtD.EVENT_2], function(e) {
 		ok(true, "Event called");
@@ -37,7 +37,7 @@ test("Dispatch single event", function() {
 
 	expect(2);
 
-	var evtD = new EventDispatcher(['EVENT']);
+	var evtD = new UTILS.EventDispatcher(['EVENT']);
 	evtD.addEventListener(evtD.EVENT, function(e) {
 		ok(true, "Event called");
 		ok(e == "test", "Event data is correct");
@@ -50,7 +50,7 @@ test("Dispatch multiple events", function() {
 
 	expect(2);
 
-	var evtD = new EventDispatcher(['EVENT_1', 'EVENT_2']);
+	var evtD = new UTILS.EventDispatcher(['EVENT_1', 'EVENT_2']);
 	evtD.addEventListener(evtD.EVENT_1, function() {
 			ok(true, "Event 1 called");
 		})
@@ -65,7 +65,7 @@ test("Remove single event", function() {
 
 	expect(0);
 
-	var evtD = new EventDispatcher(['EVENT']),
+	var evtD = new UTILS.EventDispatcher(['EVENT']),
 		func = function() {
 			ok(false, "Event should have been removed");
 		}
@@ -80,7 +80,7 @@ test("Remove all events", function() {
 
 	expect(1);
 
-	var evtD = new EventDispatcher(['EVENT_1', 'EVENT_2']);
+	var evtD = new UTILS.EventDispatcher(['EVENT_1', 'EVENT_2']);
 
 	evtD.addEventListener(evtD.EVENT_1, function() {});
 	evtD.addEventListener(evtD.EVENT_2, function() {});
@@ -98,7 +98,7 @@ module("Local Store Data Access Layer");
 
 test("LocalStoreDAL", function() {
 
-	var DAL = new LocalStoreDAL("TestDAL", {
+	var DAL = new UTILS.LocalStoreDAL("TestDAL", {
 		a: {
 			b: {
 				c: 5
@@ -228,7 +228,7 @@ test("Select by id", function() {
 
 	expect(1);
 
-	ok(id("idTest").innerHTML === "idTest");
+	ok(UTILS.DOM.id("idTest").innerHTML === "idTest");
 
 });
 
@@ -236,7 +236,7 @@ test("Select by query global", function() {
 
 	expect(1);
 
-	ok(sel("div[role='banner'] .selTestContent")[0].innerHTML === "selTest");
+	ok(UTILS.DOM.sel("div[role='banner'] .selTestContent")[0].innerHTML === "selTest");
 
 });
 
@@ -244,7 +244,7 @@ test("Select by query contextual", function() {
 
 	expect(1);
 
-	ok(sel(".selTestContent", id("selTest"))[0].innerHTML === "selTest");
+	ok(UTILS.DOM.sel(".selTestContent", UTILS.DOM.id("selTest"))[0].innerHTML === "selTest");
 
 });
 
@@ -252,6 +252,6 @@ test("Create element", function() {
 
 	expect(1);
 	
-	ok(create("div").nodeName === "DIV");
+	ok(UTILS.DOM.create("div").nodeName === "DIV");
 
 });
