@@ -3,6 +3,13 @@ chrome-extension-utils
 
 Small library of utilities for Chrome Extension developers. You probably don't need jQuery in your app.
 
+To use
+------
+
+Grab the utils-1.0.js file and include it in your extensions.
+
+If you want to run the tests, load up the folder unpacked into your chrome extensions.
+
 Breaking changes v1.0
 ---------------------
 
