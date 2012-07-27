@@ -58,65 +58,50 @@ function EventDispatcher(events) {
 }
 
 function PortMessenger () {
-    var listeners = {},
-        connectedPorts = {};
+    var connectedPorts = {},
+        self = this;
+
+    function fmt(portName, cmd) {
+        return portName + "." + cmd;
+     }
 
     chrome.extension.onConnect.addListener(function (port) {
-        alert('b');
-        // If has had listeners already attached before connecting
-        if (listeners[port.name] && listeners[port.name].onConnect) {
-            listeners[port.name].port = port;
-            listeners[port.name].onConnect(port)
-        }
+        
+        // If there is no stored connections for that name
+        // Construct an array
         if (!connectedPorts[port.name]) {
             connectedPorts[port.name] = [];
         }
 
+        // Then push the port into the stored connections
         connectedPorts[port.name].push(port);
 
+        // Listen to disconnect and remove from store
         port.onDisconnect.addListener(function () {
             var connectedArray = connectedPorts[port.name],
             connectedIndex = connectedArray.indexOf(port);
             if (connectedIndex !== -1) {
-                connectedArray.splice(connectedIndex, 1)
+                connectedArray.splice(connectedIndex, 1);
+                self.dispatchEvent(fmt(port.name, self.DISCONNECT), port.name);
             }
         });
+
+        self.dispatchEvent(fmt(port.name, self.CONNECT), port.name);
+
+        // 2 way
+
+        port.onMessage.addListener(function(msg) {
+            self.dispatchEvent(fmt(port.name, msg.CMD), msg.Data);
+        })
+
     });
-    this.addListener = function (portName, message, handler) {
-        if (!listeners[portName]) {
-            listeners[portName] = {}
-        }
-        if (!listeners[portName][message]) {
-            listeners[portName][message] = []
-        }
-        listeners[portName][message].push(handler);
-        if (!listeners[portName].port) {
-            listeners[portName].onConnect = function (port) {
-                listeners[portName].port.onMessage.addListener(function (msg) {
-                    var listenersArray = listeners[portName][msg.Name];
-                    if (listenersArray.length > 0) {
-                        for (var i = 0; i < listenersArray.length; i++) {
-                            listenersArray[i](msg.Data)
-                        }
-                    }
-                });
-                var connectListeners = listeners[portName]["onConnect"];
-                if (connectListeners.length > 0) {
-                    for (var i = 0; i < connectListeners.length; i++) {
-                        connectListeners[i]();
-                    }
-                }
-            }
-        }
-    };
-    this.removeListener = function (portName, message, handler) {
-        var listenersArray = listeners[portName][message],
-            listenerIndex = listenersArray.indexOf(handler);
-        if (listenerIndex !== -1) {
-            listenersArray.splice(listenerIndex, 1)
-        }
-    };
+
+    this.getConnectedPorts = function(portName) {
+        return connectedPorts[portName];
+    }
+
     this.sendMessage = function (portName, message, currentTab) {
+
         if (connectedPorts[portName] && connectedPorts[portName].length > 0) {
             for (var i = 0; i < connectedPorts[portName].length; i++) {
                 var port = connectedPorts[portName][i];
@@ -133,44 +118,28 @@ function PortMessenger () {
             }
         }
     }
-};
+}
+PortMessenger.prototype = new EventDispatcher(["CONNECT", "DISCONNECT"]);
 
+
+// Request Messenger is only reactionary, but can send a response back
 function RequestMessenger() {
 
-    var listeners = {};
+    var self = this;
 
-    this.addListener = function (requestName, handler) {
-        if (!listeners[requestName]) {
-            listeners[requestName] = [];
-        }
-        listeners[requestName].push(handler);
-    };
-
-    this.removeListener = function (requestName, handler) {
-        if (listeners[requestName]) {
-            var listenersArray = listeners[requestName],
-                listenerIndex = listenersArray.indexOf(handler);
-            if (listenerIndex !== -1) {
-                listenersArray.splice(listenerIndex, 1)
-            }
-        }
-    };
-
-    this.removeAllListeners = function (requestName) {
-        if (listeners[requestName]) {
-            listeners[requestName] = [];
-        };
-    }
-
-    chrome.extension.onRequest.addListener(function (request, sender, response) {
-        if (listeners[request.Name]) {
-            for (var i = 0; i < listeners[request.Name].length; i++) {
-                listeners[request.Name][i](request.Data, response);
-            }
-        }
+    chrome.extension.onRequest.addListener(function (msg, sender, responseFunc) {
+        
+        // Pass it on to the listener to deal with the response
+        self.dispatchEvent(msg.CMD, {
+            Data: msg.Data,
+            Sender: sender,
+            ResponseFunc: responseFunc
+        })
+        
     });
 
 }
+RequestMessenger.prototype = new EventDispatcher();
 
 
 
@@ -193,8 +162,6 @@ Array.prototype.indexOfObject = function (prop, val) {
     }
     return -1;
 };
-
-
 
 function updateNestedObjectProperty(obj, keyStr, value) {
     var keyPath = keyStr.split('.');
@@ -242,19 +209,6 @@ function getNestedObjectProperty (ob, key) {
     return null;
 };
 
-
-function $(e) {
-	return document.getElementById(e);
-}
-function $$(e) {
-	return document.createElement(e);
-}
-
-function getXMLString(xml, node) {
-	return xml.querySelectorAll(node)[0].firstChild.nodeValue;
-}
-
-
 function LocalStoreDAL(storage, defaultModel) {
 
     this.storage = storage;
@@ -286,4 +240,19 @@ function LocalStoreDAL(storage, defaultModel) {
         localStorage.removeItem(this.storage);
     }
 
+}
+
+function id(e) {
+    return document.getElementById(e);
+}
+
+function sel(q,c) {
+    if(c) {
+        return c.querySelectorAll(q)
+    }
+    return document.querySelectorAll(q);
+}
+
+function create(e) {
+    return document.createElement(e);
 }

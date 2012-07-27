@@ -1,8 +1,8 @@
 // ------------------------------------------------------------------
-// EventDispatcher
+// Event Dispatcher
 // ------------------------------------------------------------------
 
-module("EventDispatcher");
+module("Event Dispatcher");
 
 test("Get Listeners", function() {
 
@@ -91,10 +91,10 @@ test("Remove all events", function() {
 });
 
 // ------------------------------------------------------------------
-// LocalStoreDAL
+// Local Store Data Access Layer
 // ------------------------------------------------------------------
 
-module("LocalStoreDAL");
+module("Local Store Data Access Layer");
 
 test("LocalStoreDAL", function() {
 
@@ -142,30 +142,116 @@ test("LocalStoreDAL", function() {
 
 
 // ------------------------------------------------------------------
-// PortMessenger
+// Port Messenger
 // ------------------------------------------------------------------
 
-module("PortMessenger");
-
-var portMessenger = new PortMessenger(),
-	testPort;
+module("Port Messenger");
 
 asyncTest("Connect", function() {
 	
 	expect(1);
 
-	portMessenger.addListener("testPort", "onConnect", function() {
-		alert('a');
+	var connectTestPort = chrome.extension.connect({ name: "connectTestPort" });
+	connectTestPort.onMessage.addListener(function (msg) {	
 		ok(true, "Connect");
+		connectTestPort.disconnect();
 		start();
 	});
 
-	testPort = chrome.extension.connect({ name: "testPort" });
-	console.log(portMessenger)
-	console.log(testPort)
 
 });
 
-test("Send and receive Message", function() {
+asyncTest("Disconnect", function() {
+	
+	expect(1);
+
+	// Test that the port before disconnected
+
+	var disconnectTestPort = chrome.extension.connect({ name: "disconnectTestPort" });
+
+	disconnectTestPort.onMessage.addListener(function (msg) {
+		ok(msg.Data.length == 0, "Disconnect");
+		disconnectTestPort.disconnect();
+		start();
+	});
+
+
+});
+
+
+asyncTest("Message background page", function() {
+	
+	expect(1);
+
+	// Test that the port before disconnected
+
+	var messageBackgroundTestPort = chrome.extension.connect({ name: "messageBackgroundTestPort" });
+
+	messageBackgroundTestPort.onMessage.addListener(function (msg) {
+		ok(msg.Data == "marco polo", "Message reciprocated");
+		messageBackgroundTestPort.disconnect();
+		start();
+	});
+
+	messageBackgroundTestPort.postMessage({CMD: "doTest", Data: "marco"})
+
+});
+
+// ------------------------------------------------------------------
+// Request Messenger
+// ------------------------------------------------------------------
+
+module("Request Messenger");
+
+asyncTest("Send and receive", function() {
+
+	expect(1);
+
+	chrome.extension.sendRequest({
+		CMD: "doRequestTest",
+		Data: "marco"
+	}, function(msg) {
+		ok(msg.Data == "marco polo", "Message reciprocated");
+		start();
+	});
+
+});
+
+
+// ------------------------------------------------------------------
+// DOM tools
+// ------------------------------------------------------------------
+
+module("DOM tools");
+
+test("Select by id", function() {
+
+	expect(1);
+
+	ok(id("idTest").innerHTML === "idTest");
+
+});
+
+test("Select by query global", function() {
+
+	expect(1);
+
+	ok(sel("div[role='banner'] .selTestContent")[0].innerHTML === "selTest");
+
+});
+
+test("Select by query contextual", function() {
+
+	expect(1);
+
+	ok(sel(".selTestContent", id("selTest"))[0].innerHTML === "selTest");
+
+});
+
+test("Create element", function() {
+
+	expect(1);
+	
+	ok(create("div").nodeName === "DIV");
 
 });

@@ -22,5 +22,12 @@
 			"local_path": "main.html"
 		}
 	},
+	"background": {
+		"scripts": [
+			"utils-1.0.js",
+			"background.js"
+		]
+	},
+	// enable offline
 	"minimum_chrome_version": "18"
 }
