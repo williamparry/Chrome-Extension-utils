@@ -1,7 +1,9 @@
 chrome-extension-utils
 ======================
 
-Small library of utilities for Chrome Extension developers. You probably don't need jQuery in your app.
+Small library of utilities for Chrome Extension developers.
+
+Chrome uses Javascript 1.8, which, coupled with CSS3 means you probably don't have to use jQuery in your apps.
 
 To use
 ------
@@ -10,25 +12,12 @@ Grab the utils-1.0.js file and include it in your extensions.
 
 If you want to run the tests, load up the folder unpacked into your chrome extensions.
 
-Breaking changes v1.0
----------------------
+Features
+--------
 
-Port Messenger has changed syntax for listening to commands.
-
-	portMessenger.addEventListener("{port name}.{command}", function (args) { });
-
-$(elementId) has changed to id(elementId)
-
-$$(elementType) has changed to create(elementType)
-
-Additions
----------
-
-sel(query, context) for querySelectorAll()
-
-LocalStoreDAL has a "delete" method which removes it from localStorage
-
-Future ideas
-------------
-
-Abstract the LocalStoreDAL to handle multiple types of storage
+- Port Messenger
+- Request Messenger
+- localStorage Data Access Layer
+- Object helpers
+- DOM helpers
+- Array helper
