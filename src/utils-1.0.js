@@ -6,7 +6,7 @@ var UTILS = {
 
     OBJ: {
 
-        updateByPath: function(obj, keyStr, value) {
+        updateByPath: function (obj, keyStr, value) {
             var keyPath = keyStr.split('.'),
             lastKeyIndex = keyPath.length - 1;
             for (var i = 0; i < lastKeyIndex; ++i) {
@@ -18,38 +18,20 @@ var UTILS = {
             obj[keyPath[lastKeyIndex]] = value;
         },
 
-        getByPath: function (ob, key) {
-            var path = key.split('.'),
-                objTraversals = 0;
-
-            function traverse(obj) {
-                if (typeof obj == 'object') {
-                    for (var y in obj) {
-                        if (y == path[objTraversals]) {
-                            if (objTraversals == path.length - 1) {
-                                return obj[y];
-                            } else {
-                                objTraversals++;
-                                return traverse(obj[y]);
-                            }
-                        }
-                    }
-                }
-                return null;
+        getByPath: function (obj, key, remaining) {
+            if ( remaining == undefined ) {
+                remaining = key.split('.');
             }
-
-            for (var x in ob) {
-                if (x == path[objTraversals]) {
-                    if (objTraversals == path.length - 1) {
-                        return ob[x] || "";
-                    } else {
-                        objTraversals++;
-                        return traverse(ob[x]);
-                    }
+            var current = remaining.shift();
+            if ( typeof(obj) == 'object' && obj[current] != undefined ) {
+                if ( remaining.length == 0 ) {
+                    return obj[current];
+                } else if ( typeof(obj[current]) == 'object' ) {
+                    return arguments.callee(obj[current], undefined, remaining);
                 }
             }
             return null;
-        },
+        }
 
     },
 
