@@ -1,4 +1,4 @@
-/// <reference path="vsdoc/utils-1.0-vsdoc.js" />
+/// <reference path="vsdoc/utils-1.1-vsdoc.js" />
 /// <reference path="vsdoc/chrome-vsdoc.js" />
 
 // ------------------------------------------------------------------
@@ -334,5 +334,178 @@ asyncTest("Send and receive", function() {
 		ok(msg.Data == "marco polo", "Message reciprocated");
 		start();
 	});
+
+});
+
+// ------------------------------------------------------------------
+// XHR
+// ------------------------------------------------------------------
+
+module("XHR");
+
+asyncTest("Manager with one", function () {
+
+    expect(3);
+
+    var xhrManager = new UTILS.XHR.Manager(5),
+        evtD = new UTILS.EventDispatcher(['EVENT_COMPLETE', 'EVENT_SUCCESS']);
+
+    xhrManager.queue(new UTILS.XHR.ManagedEvent(function () {
+        
+        ok(xhrManager.currentConnections === 1, "Current connections correct amount at time of call");
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "testdata.json", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                
+                if (xhr.status === 200) {
+                    evtD.dispatchEvent(evtD.EVENT_COMPLETE);
+                    evtD.dispatchEvent(evtD.EVENT_SUCCESS);
+                    ok(xhrManager.currentConnections === 0, "Current connections updated");
+                    start();
+                }
+            }
+        };
+        xhr.send(null);
+
+    }, evtD)).addEventListener('EVENT_SUCCESS', function() {
+        ok(true, "EVENT_SUCCESS handled");
+    });
+
+});
+
+asyncTest("Manager with two unrestricted connections", function () {
+
+    expect(2);
+
+    var xhrManager = new UTILS.XHR.Manager(5),
+        lastEvtId,
+        evtRespCount = 0;
+
+  function processQueue(id) {
+      console.log(id);
+      ok(id > (lastEvtId || 0), "Events firing in order (" + id + ")");
+
+      lastEvtId = id;
+  }
+
+  function processResponses() {
+
+      evtRespCount++;
+      if (evtRespCount === 2) {
+          start();
+      }
+  }
+
+    xhrManager.queue(new UTILS.XHR.ManagedEvent(function () {
+
+        processQueue(1);
+
+        var xhr = new XMLHttpRequest(),
+            self = this;
+
+        xhr.open("GET", "testdata.json", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+
+                if (xhr.status === 200) {
+                    self.evtD.dispatchEvent(self.evtD.EVENT_COMPLETE);
+                    self.evtD.dispatchEvent(self.evtD.EVENT_SUCCESS);
+                }
+            }
+        };
+        xhr.send(null);
+
+    }, new UTILS.EventDispatcher(['EVENT_COMPLETE', 'EVENT_SUCCESS']))).addEventListener('EVENT_SUCCESS', function () {
+        processResponses();
+    });
+
+
+    xhrManager.queue(new UTILS.XHR.ManagedEvent(function () {
+
+        processQueue(2);
+
+        var xhr = new XMLHttpRequest(),
+            self = this;
+        xhr.open("GET", "manifest.json", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+
+                if (xhr.status === 200) {
+                    self.evtD.dispatchEvent(self.evtD.EVENT_COMPLETE);
+                    self.evtD.dispatchEvent(self.evtD.EVENT_SUCCESS);
+                }
+            }
+        };
+        xhr.send(null);
+
+    }, new UTILS.EventDispatcher(['EVENT_COMPLETE', 'EVENT_SUCCESS']))).addEventListener('EVENT_SUCCESS', function () {
+        processResponses();
+    });
+
+
+});
+
+
+asyncTest("Manager with three restricted to 1 at a time", function () {
+
+    expect(6);
+
+    var xhrManager = new UTILS.XHR.Manager(1),
+        lastEvtId,
+        lastRespId,
+        evtRespCount = 0;
+
+    function processQueue(id) {
+        
+        ok(id > (lastEvtId || 0), "Events firing in order (" + id + ")");
+
+        lastEvtId = id;
+    }
+
+    function processResponses(id) {
+
+        ok(id > (lastRespId || 0), "Events responding in order (" + id + ")");
+
+        lastRespId = id;
+
+        evtRespCount++;
+        if (evtRespCount === 3) {
+            start();
+        }
+    }
+
+    function makeManagedEvent(id) {
+
+        return new UTILS.XHR.ManagedEvent(function () {
+
+            processQueue(id);
+
+            var xhr = new XMLHttpRequest(),
+                self = this;
+
+            xhr.open("GET", "manifest.json", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+
+                    if (xhr.status === 200) {
+                        self.evtD.dispatchEvent(self.evtD.EVENT_COMPLETE);
+                        self.evtD.dispatchEvent(self.evtD.EVENT_SUCCESS);
+                    }
+                }
+            };
+            xhr.send(null);
+
+        }, new UTILS.EventDispatcher(['EVENT_COMPLETE', 'EVENT_SUCCESS']).addEventListener('EVENT_SUCCESS', function () {
+            processResponses(id);
+        }));
+
+    }
+
+    xhrManager.queue(makeManagedEvent(1));
+    xhrManager.queue(makeManagedEvent(2));
+    xhrManager.queue(makeManagedEvent(3));
+
 
 });

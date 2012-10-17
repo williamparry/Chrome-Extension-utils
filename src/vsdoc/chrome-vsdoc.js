@@ -147,6 +147,26 @@
             }
         }
 
+    },
+
+    contextMenus: new function() {
+
+
+        function OnClickData() {
+            /// <field name="selectionText" type="String" optional="true">The text for the context selection, if any.</field>
+            this.selectionText = null;
+
+            /// <field name="checked" type="Boolean" optional="true">A flag indicating the state of a checkbox or radio item after it is clicked.</field>
+            this.checked = null;
+
+        }
+
+        var x = new OnClickData().
+
     }
 
 }
+
+chrome.contextMenus.
+
+
