@@ -355,7 +355,7 @@ asyncTest("Manager with one", function () {
         ok(xhrManager.currentConnections === 1, "Current connections correct amount at time of call");
 
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "testdata.json", true);
+        xhr.open("GET", "manifest.json", true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 
@@ -384,7 +384,6 @@ asyncTest("Manager with two unrestricted connections", function () {
         evtRespCount = 0;
 
   function processQueue(id) {
-      console.log(id);
       ok(id > (lastEvtId || 0), "Events firing in order (" + id + ")");
 
       lastEvtId = id;
@@ -405,7 +404,7 @@ asyncTest("Manager with two unrestricted connections", function () {
         var xhr = new XMLHttpRequest(),
             self = this;
 
-        xhr.open("GET", "testdata.json", true);
+        xhr.open("GET", "manifest.json", true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
 

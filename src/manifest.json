@@ -24,7 +24,7 @@
 	},
 	"background": {
 		"scripts": [
-			"utils-1.0.js",
+			"utils-1.2.js",
 			"background.js"
 		]
 	},
