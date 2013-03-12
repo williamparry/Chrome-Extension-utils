@@ -241,8 +241,8 @@ var UTILS = {
 
     Tab: {
 
-        captureFull: function () {
-            console.log('capture');
+        captureFull: function (captureOptions, injectPath) {
+            
             var shots = [],
                 requestMessenger = new UTILS.RequestMessenger(),
                 evtD = new UTILS.EventDispatcher(['EVENT_COMPLETE']);
@@ -255,7 +255,7 @@ var UTILS = {
                     
                     setTimeout(function () {
 
-                        chrome.tabs.captureVisibleTab(null, { format: "png" }, function (img) {
+                        chrome.tabs.captureVisibleTab(null, captureOptions || { format: "png" }, function (img) {
 
                             shots.push(img);
 
@@ -319,8 +319,7 @@ var UTILS = {
 
                     return true;
                 });
-                console.log('execute script', tab);
-                chrome.tabs.executeScript(tab.id, { file: "inject/Tab.captureFull.js" });
+                chrome.tabs.executeScript(tab.id, { file: injectPath || "inject/Tab.captureFull.js" });
             });
 
             return evtD;

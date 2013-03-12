@@ -166,7 +166,11 @@
 
     Tab: {
 
-        captureFull: function () {
+        captureFull: function (captureOptions, injectPath) {
+
+            /// <summary>Capture the full tab into an image</summary>
+            /// <param name="captureOptions" type="Object" optional="true">Quality and image type parameters</param>
+            /// <param name="injectPath" type="string" optional="true"Path to the injection script</param>
 
         }
 
