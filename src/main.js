@@ -1,4 +1,4 @@
-/// <reference path="vsdoc/utils-1.1-vsdoc.js" />
+/// <reference path="vsdoc/utils-1.3-vsdoc.js" />
 /// <reference path="vsdoc/chrome-vsdoc.js" />
 
 // ------------------------------------------------------------------
@@ -327,7 +327,7 @@ asyncTest("Send and receive", function() {
 
 	expect(1);
 
-	chrome.extension.sendRequest({
+	chrome.extension.sendMessage({
 		CMD: "doRequestTest",
 		Data: "marco"
 	}, function(msg) {
@@ -335,6 +335,30 @@ asyncTest("Send and receive", function() {
 		start();
 	});
 
+});
+
+// ------------------------------------------------------------------
+// Tab
+// ------------------------------------------------------------------
+
+module("Tab");
+
+asyncTest("Capture full", function () {
+
+    expect(1);
+
+    chrome.extension.sendMessage({
+        CMD: "doTabCaptureFullTest",
+        Data: "test"
+    }, function (msg) {
+        //chrome.tabs.create({ url: msg.Data });
+        ok(msg.Data, "Image constructed");
+        start();
+    });
+
+   
+
+   
 });
 
 // ------------------------------------------------------------------

@@ -36,3 +36,39 @@ requestMessenger.addEventListener("doRequestTest", function(msg) {
 		Data: msg.Data + " polo"
 	});
 });
+
+
+// ------------------------------------------------------------------
+// Proxy for Tab
+// ------------------------------------------------------------------
+
+
+requestMessenger.addEventListener("doTabCaptureFullTest", function (msg) {
+
+
+    chrome.tabs.create({
+        url: 'http://www.reddit.com'
+    }, function (tab) {
+
+        chrome.tabs.onUpdated.addListener(function (tabId, info) {
+
+            if (info.status == "complete") {
+
+                if (tabId == tab.id) {
+                    
+                    UTILS.Tab.captureFull().addEventListener('EVENT_COMPLETE', function (img) {
+                        chrome.tabs.remove(tab.id);
+                        msg.ResponseFunc({
+                            Name: "Message",
+                            Data: img
+                        });
+
+                    });
+
+                }
+            }
+        }); 
+
+    });
+
+});
