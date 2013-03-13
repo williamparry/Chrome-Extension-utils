@@ -130,7 +130,8 @@ var UTILS = {
         this.dispatchEvent = function (title, args) {
             if (listeners[title]) {
             	for (var i = 0; i < listeners[title].length; i++) {
-                    listeners[title][i].method(args);
+            		var method = listeners[title][i].method;
+                    method.apply(method, [args]);
                 }
             }
             return this;
@@ -354,14 +355,13 @@ var UTILS = {
         		});
 
         		chrome.tabs.executeScript(tab.id, { file: injectPath }, function () {
-        				
         			chrome.tabs.sendMessage(tab.id, {
         				portId: id,
         				untilY: untilY || false
         			});
-
         		});
 
+        		
         	});
 
         	return evtD;
