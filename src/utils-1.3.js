@@ -4,6 +4,18 @@ var UTILS = {
     // Object Helpers
     // ------------------------------------------------------------------
 
+	GUID: function () {
+
+		function s4() {
+			return Math.floor((1 + Math.random()) * 0x10000)
+						.toString(16)
+						.substring(1);
+		};
+
+		return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+				s4() + '-' + s4() + s4() + s4();
+	},
+
     OBJ: {
 
         updateByPath: function (obj, keyStr, value) {
@@ -117,7 +129,7 @@ var UTILS = {
         };
         this.dispatchEvent = function (title, args) {
             if (listeners[title]) {
-                for (var i = 0; i < listeners[title].length; i++) {
+            	for (var i = 0; i < listeners[title].length; i++) {
                     listeners[title][i].method(args);
                 }
             }
@@ -222,7 +234,6 @@ var UTILS = {
         var self = this;
 
         chrome.extension.onMessage.addListener(function (msg, sender, responseFunc) {
-            console.log(msg.CMD, responseFunc);
             // Pass it on to the listener to deal with the response
             self.dispatchEvent(msg.CMD, {
                 Data: msg.Data,
@@ -238,91 +249,122 @@ var UTILS = {
     // ------------------------------------------------------------------
     // Tab
     // ------------------------------------------------------------------
-
+	
     Tab: {
 
-        captureFull: function (captureOptions, injectPath) {
-            
-            var shots = [],
-                requestMessenger = new UTILS.RequestMessenger(),
-                evtD = new UTILS.EventDispatcher(['EVENT_COMPLETE']);
+        toImage: function (imageOptions, injectPath, untilY) {
 
-            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                
-                var tab = tabs[0];
+			var shots = [],
+				id = UTILS.GUID(),
+				portMessenger = new UTILS.PortMessenger(),
+        		canvas = document.createElement('canvas'),
+        		ctx = canvas.getContext('2d'),
+        		evtD = new UTILS.EventDispatcher(['EVENT_COMPLETE']);
 
-                requestMessenger.addEventListener("captureArea", function (msg) {
-                    
-                    setTimeout(function () {
+        	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
 
-                        chrome.tabs.captureVisibleTab(null, captureOptions || { format: "png" }, function (img) {
+        		var tab = tabs[0];
 
-                            shots.push(img);
+        		portMessenger.addEventListener(id + ".CAPTURE", function (injectData) {
+        			
+        			setTimeout(function () {
 
-                            if (msg.Data.moreToCome) {
-                                console.log(msg.ResponseFunc);
-                                msg.ResponseFunc(true);
+        				chrome.tabs.captureVisibleTab(null, imageOptions || { format: "png" }, function (img) {
 
-                            } else {
+        					shots.push(img);
 
-                                msg.ResponseFunc(false);
+        					if (injectData.moreToCome) {
+        						portMessenger.sendMessage(id, {
+        							CMD: 'SCROLL'
+        						}, tab);
+        					} else {
 
-                                if (shots.length === 1) {
+        						portMessenger.sendMessage(id, {
+        							CMD: 'STOP'
+        						}, tab);
 
-                                    evtD.dispatchEvent(evtD.EVENT_COMPLETE, img);
+        						if (shots.length === 1) {
 
-                                } else {
+        							var singleImage = new Image();
 
-                                    var canvas = document.createElement('canvas');
-                                    var ctx = canvas.getContext('2d');
-                                    canvas.width = msg.Data.width;
-                                    canvas.height = msg.Data.height;
+        							singleImage.src = img;
 
-                                    var overflowData = shots.splice(shots.length - 1, 1)[0];
+        							singleImage.onload = function () {
 
-                                    for (var i = 0; i < shots.length; i++) {
+        								canvas.width = injectData.width;
+        								canvas.height = injectData.height;
 
-                                        (function (imgData, pos) {
+        								ctx.drawImage(singleImage, 0, 0, injectData.width, injectData.height, 0, 0, injectData.width, injectData.height);
 
-                                            var img = new Image();
+        								evtD.dispatchEvent(evtD.EVENT_COMPLETE, canvas.toDataURL("image/png"));
 
-                                            img.src = imgData;
+        							}
 
-                                            img.onload = function () {
+        						} else {
 
-                                                ctx.drawImage(img, 0, 0, msg.Data.width, msg.Data.viewHeight, 0, msg.Data.viewHeight * pos, msg.Data.width, msg.Data.viewHeight);
+        							canvas.width = injectData.width;
+        							canvas.height = injectData.height;
 
-                                                if (pos === shots.length - 1) {
+        							var overflowData = shots.splice(shots.length - 1, 1)[0];
 
-                                                    var bottomImg = new Image();
+        							for (var i = 0; i < shots.length; i++) {
 
-                                                    bottomImg.src = overflowData;
+        								(function (imgData, pos) {
 
-                                                    bottomImg.onload = function () {
+        									var img = new Image();
 
-                                                        ctx.drawImage(bottomImg, 0, msg.Data.overflow, msg.Data.width, msg.Data.viewHeight - msg.Data.overflow, 0,
-                                                                        msg.Data.viewHeight * shots.length, msg.Data.width, msg.Data.viewHeight - msg.Data.overflow);
-                                                        
-                                                        evtD.dispatchEvent(evtD.EVENT_COMPLETE, canvas.toDataURL("image/png"));
+        									img.src = imgData;
 
-                                                        requestMessenger.removeAllEventListeners("captureArea");
-                                                    }
-                                                }
-                                            }
-                                        })(shots[i], i);
-                                    }
-                                }
-                            }
-                        });
+        									img.onload = function () {
 
-                    }, 50);
+        										ctx.drawImage(img,
+													0, 0,
+													injectData.width, injectData.viewHeight,
+													0, injectData.viewHeight * pos, // Position underneath the last shot
+													injectData.width, injectData.viewHeight);
 
-                    return true;
-                });
-                chrome.tabs.executeScript(tab.id, { file: injectPath || "inject/Tab.captureFull.js" });
-            });
+        										if (pos === shots.length - 1) {
+        											
+        											var bottomImg = new Image();
 
-            return evtD;
+        											bottomImg.src = overflowData;
+        											
+        											bottomImg.onload = function () {
+        												// Bear in mind the different overflows - hitting the bottom of the page
+        												// And reaching the bottom because of untilY
+        												ctx.drawImage(bottomImg,
+															0, untilY ? 0 : injectData.overflow, // Coords of overflow (top left)
+															injectData.width, injectData.viewHeight - injectData.overflow, // Size - full width and just the overflow size 
+															0, injectData.viewHeight * shots.length, // Position on existing canvas
+															injectData.width, injectData.viewHeight - injectData.overflow); // Size on canvas
+
+        												evtD.dispatchEvent(evtD.EVENT_COMPLETE, canvas.toDataURL("image/png"));
+
+        											}
+        										}
+        									}
+        								})(shots[i], i);
+        							}
+        						}
+        					}
+        				});
+
+        			}, 50);
+					
+        		});
+
+        		chrome.tabs.executeScript(tab.id, { file: injectPath }, function () {
+        				
+        			chrome.tabs.sendMessage(tab.id, {
+        				portId: id,
+        				untilY: untilY || false
+        			});
+
+        		});
+
+        	});
+
+        	return evtD;
 
         }
 

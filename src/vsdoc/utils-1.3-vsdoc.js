@@ -166,11 +166,12 @@
 
     Tab: {
 
-        captureFull: function (captureOptions, injectPath) {
+    	toImage: function (imageOptions, injectPath, untilY) {
 
             /// <summary>Capture the full tab into an image</summary>
-            /// <param name="captureOptions" type="Object" optional="true">Quality and image type parameters</param>
-            /// <param name="injectPath" type="string" optional="true"Path to the injection script</param>
+            /// <param name="imageOptions" type="Object" optional="true">Quality and image type parameters</param>
+            /// <param name="injectPath" type="string">Path to the injection script</param>
+        	/// <param name="untilY" type="Number" optional="true">Capture until a Y position</param>
 
         }
 

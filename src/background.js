@@ -1,3 +1,5 @@
+/// <reference path="vsdoc/utils-1.3-vsdoc.js" />
+/// <reference path="vsdoc/chrome-vsdoc.js" />
 var portMessenger = new UTILS.PortMessenger(),
 	requestMessenger = new UTILS.RequestMessenger();
 
@@ -43,11 +45,37 @@ requestMessenger.addEventListener("doRequestTest", function(msg) {
 // ------------------------------------------------------------------
 
 
-requestMessenger.addEventListener("doTabCaptureFullTest", function (msg) {
+requestMessenger.addEventListener("doTabToImage", function (msg) {
 
+	chrome.tabs.create({
+		url: 'http://www.reddit.com/'
+	}, function (tab) {
+
+		chrome.tabs.onUpdated.addListener(function (tabId, info) {
+
+			if (info.status == "complete") {
+
+				if (tabId == tab.id) {
+					UTILS.Tab.toImage(null, "inject/Tab.toImage.js", null).addEventListener('EVENT_COMPLETE', function (img) {
+						chrome.tabs.remove(tab.id);
+						msg.ResponseFunc({
+							Data: { img: img }
+						});
+
+					});
+
+				}
+			}
+		});
+
+	});
+
+});
+
+requestMessenger.addEventListener("doTabToImageNoScroll", function (msg) {
 
     chrome.tabs.create({
-        url: 'http://www.reddit.com'
+        url: 'http://www.reddit.com/'
     }, function (tab) {
 
         chrome.tabs.onUpdated.addListener(function (tabId, info) {
@@ -55,12 +83,11 @@ requestMessenger.addEventListener("doTabCaptureFullTest", function (msg) {
             if (info.status == "complete") {
 
                 if (tabId == tab.id) {
-                    
-                    UTILS.Tab.captureFull().addEventListener('EVENT_COMPLETE', function (img) {
+                	var height = Math.floor(Math.random() * 600);
+                	UTILS.Tab.toImage(null, "inject/Tab.toImage.js", height).addEventListener('EVENT_COMPLETE', function (img) {
                         chrome.tabs.remove(tab.id);
                         msg.ResponseFunc({
-                            Name: "Message",
-                            Data: img
+                            Data: { img: img, height: height }
                         });
 
                     });
@@ -72,3 +99,35 @@ requestMessenger.addEventListener("doTabCaptureFullTest", function (msg) {
     });
 
 });
+
+requestMessenger.addEventListener("doTabToImageWithScroll", function (msg) {
+
+	chrome.tabs.create({
+		url: 'http://www.reddit.com/'
+	}, function (tab) {
+
+		chrome.tabs.onUpdated.addListener(function (tabId, info) {
+
+			if (info.status == "complete") {
+
+				if (tabId == tab.id) {
+					var height = Math.floor(Math.random() * (1500 - 1000 + 1)) + 1000;
+					UTILS.Tab.toImage(null, "inject/Tab.toImage.js", height).addEventListener('EVENT_COMPLETE', function (img) {
+						chrome.tabs.remove(tab.id);
+						msg.ResponseFunc({
+							Name: "Message",
+							Data: { img: img, height: height }
+						});
+
+					});
+
+				}
+			}
+		});
+
+	});
+
+});
+
+
+
