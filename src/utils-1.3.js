@@ -253,7 +253,7 @@ var UTILS = {
 	
     Tab: {
 
-        toImage: function (imageOptions, injectPath, untilY) {
+        toImage: function (imageOptions, injectPath) {
 
 			var shots = [],
 				id = UTILS.GUID(),
@@ -334,7 +334,7 @@ var UTILS = {
         												// Bear in mind the different overflows - hitting the bottom of the page
         												// And reaching the bottom because of untilY
         												ctx.drawImage(bottomImg,
-															0, untilY ? 0 : injectData.overflow, // Coords of overflow (top left)
+															0, injectData.overflow, // Coords of overflow (top left)
 															injectData.width, injectData.viewHeight - injectData.overflow, // Size - full width and just the overflow size 
 															0, injectData.viewHeight * shots.length, // Position on existing canvas
 															injectData.width, injectData.viewHeight - injectData.overflow); // Size on canvas
@@ -356,8 +356,7 @@ var UTILS = {
 
         		chrome.tabs.executeScript(tab.id, { file: injectPath }, function () {
         			chrome.tabs.sendMessage(tab.id, {
-        				portId: id,
-        				untilY: untilY || false
+        				portId: id
         			});
         		});
 

@@ -12,11 +12,9 @@ chrome.extension.onMessage.addListener(function (data) {
 		docHeight,
 		viewHeight,
 		overlay,
-		buffer,
-		untilY;
+		buffer;
 
 	ref = arguments.callee;
-	untilY = data.untilY;
 	port = chrome.extension.connect({ name: data.portId });
 	origOverflowY = document.body.style.overflowY;
 	document.body.style.overflowY = 'hidden';
@@ -41,15 +39,15 @@ chrome.extension.onMessage.addListener(function (data) {
 
 		buffer += viewHeight;
 
-		if (buffer >= (untilY || docHeight)) {
+		if (buffer >= docHeight) {
 
 			port.postMessage({
 				CMD: 'CAPTURE',
 				Data: {
 					moreToCome: false,
-					overflow: buffer - (untilY || docHeight),
+					overflow: buffer - docHeight,
 					width: window.innerWidth,
-					height: untilY || docHeight,
+					height: docHeight,
 					viewHeight: viewHeight
 				}
 			});

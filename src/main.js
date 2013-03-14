@@ -362,44 +362,6 @@ asyncTest("To image", function () {
 
 });
 
-asyncTest("To image no scroll", function () {
-
-	expect(1);
-
-	chrome.extension.sendMessage({
-		CMD: "doTabToImageNoScroll"
-	}, function (msg) {
-		var img = new Image();
-		img.src = msg.Data.img;
-		img.onload = function () {
-			chrome.tabs.create({ url: msg.Data.img });
-			ok(img.height === msg.Data.height, "Image constructed and the right height - " + img.height);
-			start();
-		};
-
-	});
-
-});
-
-asyncTest("To image with scroll", function () {
-
-	expect(1);
-
-	chrome.extension.sendMessage({
-		CMD: "doTabToImageWithScroll"
-	}, function (msg) {
-		var img = new Image();
-		img.src = msg.Data.img;
-		img.onload = function () {
-			chrome.tabs.create({ url: msg.Data.img });
-			ok(img.height === msg.Data.height, "Image constructed and the right height - " + img.height);
-			start();
-		};
-
-	});
-
-});
-
 // ------------------------------------------------------------------
 // XHR
 // ------------------------------------------------------------------
