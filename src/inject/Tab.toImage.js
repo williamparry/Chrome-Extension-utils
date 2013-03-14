@@ -1,18 +1,23 @@
-﻿var UTILS_Inject_Tab_toImage = new function () {
-	
-	var self = this;
+﻿// Assumes when this script is being called, nothing else is messaging at the same time
+// Note: There's no way to set who receives what message (the first one who responds handles and discards
+// Init start to assign port id and also set an untilY
+// port id may not be necessary but sending the untilY necessitates this
+chrome.extension.onMessage.addListener(function (data) {
 
-	var port,
+	var ref,
+		port,
 		origOverflowY,
 		origOverflowX,
 		origOffsetTop,
 		docHeight,
-		untilY,
 		viewHeight,
 		overlay,
-		buffer;
+		buffer,
+		untilY;
 
-
+	ref = arguments.callee;
+	untilY = data.untilY;
+	port = chrome.extension.connect({ name: data.portId });
 	origOverflowY = document.body.style.overflowY;
 	document.body.style.overflowY = 'hidden';
 	origOverflowX = document.body.style.overflowX;
@@ -26,6 +31,7 @@
 	overlay.style.height = '100%';
 	document.body.appendChild(overlay);
 	buffer = 0;
+
 
 	function scroll() {
 
@@ -61,43 +67,23 @@
 
 	}
 
-	function stopScroll() {
+	function stopScroll () {
 		buffer = 0;
 		window.scrollTo(0, origOffsetTop);
 		document.body.style.overflowY = origOverflowY;
 		document.body.style.overflowX = origOverflowX;
 		document.body.removeChild(overlay);
 		port.disconnect();
-		chrome.extension.onMessage.removeListener(init);
+		chrome.extension.onMessage.removeListener(ref);
 	}
 
-	function init(data, sender, response) {
-
-		if (data.untilY) {
-			untilY = data.untilY;
+	port.onMessage.addListener(function (data) {
+		switch (data.CMD) {
+			case "SCROLL": scroll(); break;
+			case 'STOP': stopScroll(); break;
 		}
+	});
 
-		port = chrome.extension.connect({ name: data.portId });
+	scroll();
 
-		port.onMessage.addListener(function (data) {
-
-			switch (data.CMD) {
-				case "SCROLL":
-					scroll();
-					break;
-				case 'STOP':
-					stopScroll();
-					break;
-			}
-
-		});
-
-		scroll();
-
-
-	}
-	
-
-	chrome.extension.onMessage.addListener(init);
-
-}
+});
