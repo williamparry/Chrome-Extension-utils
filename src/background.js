@@ -48,7 +48,8 @@ requestMessenger.addEventListener("doRequestTest", function(msg) {
 requestMessenger.addEventListener("doTabToImage", function (msg) {
 
 	chrome.tabs.create({
-		url: 'http://www.reddit.com/'
+		// Put page online that has cached copy
+		url: 'https://www.williamparry.com/Chrome-Extension-utils/tab.toImage.html'
 	}, function (tab) {
 
 		chrome.tabs.onUpdated.addListener(function (tabId, info) {

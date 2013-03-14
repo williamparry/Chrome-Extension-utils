@@ -295,7 +295,11 @@ var UTILS = {
         								canvas.width = injectData.width;
         								canvas.height = injectData.height;
 
-        								ctx.drawImage(singleImage, 0, 0, injectData.width, injectData.height, 0, 0, injectData.width, injectData.height);
+        								ctx.drawImage(singleImage,
+											0, 0,
+											injectData.width, injectData.height,
+											0, 0,
+											injectData.width, injectData.height);
 
         								evtD.dispatchEvent(evtD.EVENT_COMPLETE, canvas.toDataURL("image/png"));
 
