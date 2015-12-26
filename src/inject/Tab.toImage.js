@@ -4,7 +4,9 @@
 // port id may not be necessary but sending the untilY necessitates this
 chrome.extension.onMessage.addListener(function (data) {
 
-	var ref,
+	var body,
+		html,
+		ref,
 		port,
 		origOverflowY,
 		origOverflowX,
@@ -21,7 +23,12 @@ chrome.extension.onMessage.addListener(function (data) {
 	origOverflowX = document.body.style.overflowX;
 	document.body.style.overflowX = 'hidden';
 	origOffsetTop = document.body.scrollTop;
-	docHeight = document.body.clientHeight;
+	body = document.body,
+    html = document.documentElement;
+
+	docHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+                       html.clientHeight, html.scrollHeight, html.offsetHeight );
+	
 	viewHeight = window.innerHeight;
 	overlay = document.createElement('div');
 	overlay.style.position = 'absolute';
