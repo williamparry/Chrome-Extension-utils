@@ -1,6 +1,3 @@
-/// <reference path="vsdoc/utils-1.3-vsdoc.js" />
-/// <reference path="vsdoc/chrome-vsdoc.js" />
-
 // ------------------------------------------------------------------
 // Object Helpers
 // ------------------------------------------------------------------
@@ -334,31 +331,6 @@ asyncTest("Send and receive", function() {
 		ok(msg.Data == "marco polo", "Message reciprocated");
 		start();
 	});
-
-});
-
-// ------------------------------------------------------------------
-// Tab
-// ------------------------------------------------------------------
-
-module("Tab");
-
-asyncTest("To image", function () {
-
-    expect(1);
-
-    chrome.extension.sendMessage({
-    	CMD: "doTabToImage",
-    }, function (msg) {
-    	var img = new Image();
-    	img.src = msg.Data.img;
-    	img.onload = function () {
-    		chrome.tabs.create({ url: msg.Data.img });
-    		ok(img, "Image constructed");
-    		start();
-    	};
-        
-    });
 
 });
 

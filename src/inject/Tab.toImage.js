@@ -33,8 +33,8 @@ chrome.extension.onMessage.addListener(function (data) {
 
 	function scroll() {
 
-		window.scrollTo(0, buffer);
-
+		document.documentElement.style.transform = "translateY(-" + buffer + "px)";
+		
 		overlay.style.top = document.body.scrollTop + 'px';
 
 		buffer += viewHeight;
@@ -67,6 +67,7 @@ chrome.extension.onMessage.addListener(function (data) {
 
 	function stopScroll () {
 		buffer = 0;
+		document.documentElement.style.transform = "translateY(-" + 0 + "px)";
 		window.scrollTo(0, origOffsetTop);
 		document.body.style.overflowY = origOverflowY;
 		document.body.style.overflowX = origOverflowX;
