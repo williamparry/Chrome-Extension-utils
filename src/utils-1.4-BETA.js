@@ -316,8 +316,8 @@ var UTILS = (function() {
         							CMD: 'STOP'
         						}, tab);
 								
-								canvas.width = injectData.width;
-								canvas.height = injectData.height;
+								canvas.width = injectData.width * window.devicePixelRatio;
+								canvas.height = injectData.height * window.devicePixelRatio;
 								
 								function drawImage(imgData, callback) {
 				
