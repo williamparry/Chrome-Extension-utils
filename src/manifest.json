@@ -28,7 +28,7 @@
 	},
 	"background": {
 		"scripts": [
-			"utils-1.4-BETA.js",
+			"utils-1.4.js",
 			"background.js"
 		]
 	},
